@@ -4,6 +4,9 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
+const cors = require("cors");
+app.use(cors());
+
 const port = 8893;
 
 const domains = ["https://mmx10d-storage.onrender.com/","http://localhost:8893/"]
