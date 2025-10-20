@@ -6,7 +6,7 @@ app.use(express.json());
 
 const port = 8893;
 
-const domains = ["https://mmx10d_storage.onrender.com/","http://localhost:8893/"]
+const domains = ["https://mmx10d-storage.onrender.com/","http://localhost:8893/"]
 const website = domains[0];
 
 app.get("/",(req,res)=>{
