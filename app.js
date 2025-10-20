@@ -5,7 +5,9 @@ const app = express();
 app.use(express.json());
 
 const cors = require("cors");
-app.use(cors())
+app.use(cors({
+    origin: "https://mmx10d-storage.onrender.com"
+}));
 
 const port = 8893;
 
