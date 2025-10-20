@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .item{
+            display: flex;
+            justify-content: space-around;
+        }
+        #create_btn {
+            width: 100%;
+        }
+        #add_btn {
+            position: fixed:
+            bottom: 0;
+            margin: 0 auto;
+        }
+        #item_div div {
+            margin: 3px 0
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Page title</title>
+</head>
+<body>
+    <h1>ادارة التخزين</h1>
+    <hr>
+    <div id="item_div">
+        <div class="item">لم تتلقى بيانات</div>
+    </div>
+    <button id="add_btn" onclick="add_div.style.display=''">انشاء</button>
+    <div style="display:none" id="add_div">
+        <label for="name">الاسم</label>
+        <input autofocus type="text" id="name">
+        <hr>
+        <p>رسالة</p>
+        <button id="create_btn">تم</button>
+    </div>
+</body>
+<script>
+    const domains = ["https://mmx10d_storage.onrender.com/",
+    "http://localhost:8893/"]
+    const website = domains[0];
+    
+    const item = document.querySelector(".class");
+    const new_name = document.querySelector("#name")
+    
+    create_btn.onclick = ()=>{
+        if(new_name.value == ""){
+            alert("ادخل اسم.");
+            return
+        };
+        create(new_name.value);
+    }    
+    function create(name){
+        fetch(`${website}create?name=${name}`)
+        .then(res=>{        
+        get_items();
+        new_name.value =""
+        add_div.style.display="none";
+        })
+        .catch(err=>{alert("خطأ بالاتصال..")})
+    }
+    function del(name){
+        fetch(`${website}delete?name=${name}`)
+        .then(res=>get_items())
+        .catch(err=>{alert("خطأ بالاتصال..")})
+    }
+    function read(name){
+        fetch(`${website}read?name=${name}`)
+        .then(res=>res.text())
+        .then(res=>alert(res))
+        .catch(err=>{alert("خطأ بالاتصال..")})
+    }
+    function link(name){
+        fetch(`${website}link?name=${name}`)
+        .then(res => res.text())
+        .then(res => {
+            document.open();
+            document.write(res);
+            document.close();
+        })
+        .catch(err=>{alert("خطأ بالاتصال..")})
+    }
+    function edit(name){
+        fetch(`${website}edit?name=${name}`)
+        .then(res => res.text())
+        .then(res => {
+        if(res.includes(`id="text"><`)){alert("لايمكن تعديل ملف فارغ");return}     
+            document.open();
+            document.write(res)
+            document.close();
+        })
+        .catch(err=>{alert("خطأ بالاتصال..")})
+    }
+    function add_item(name){
+        item_div.innerHTML += 
+        `
+            <div class="item">
+                <span>${name}</span>
+                <select>
+                    <option value="none">اجراء..</option>
+                    <option value="link">ربط</option>
+                    <option value="read">قرائة</option>
+                    <option value="edit">تعديل</option>
+                    <option value="del">حذف</option>
+                </select>
+            </div>
+        `;
+        items_update();
+    }
+    function items_update(){
+        const items = document.querySelectorAll(".item")
+        for(let i = 0 ; i < items.length ; i++){
+            const item = items[i];
+            const item_select = item.querySelector("select");
+            const file_name = item.querySelector("span")
+            item_select.onchange=()=>{
+                switch(item_select.value){
+                    case 'link':
+                        link(file_name.innerText);
+                        break;
+                    case 'read':
+                        read(file_name.innerText);
+                        break;
+                    case 'edit':
+                        edit(file_name.innerText);
+                        break;
+                    case 'del':
+                        let ask = confirm(`هل تاكد حذف ${file_name.innerText} ؟`)
+                        if(ask){
+                            del(file_name.innerText);
+                        }
+                        break;
+                    default:
+                    alert("لم تختر عملية")
+                }
+                item_select.value = "none"
+            }
+        }
+    }
+    function get_items(){
+        fetch(`${website}get_files`)
+        .then(res => res.json())        
+        .then(res=>{
+        item_div.innerHTML="";
+            if(res.length < 1){
+                item_div.innerHTML="لا يوجد عناصر"
+            }
+            else{
+            for(let i = 0; i<res.length;i++){
+                file = res[i];
+                add_item(file);
+            }}
+        })
+        .catch(err=>item_div.innerHTML="خطا بتلقي البيانات"+err)
+    }
+    get_items();
+</script>
+</html>
