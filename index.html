@@ -61,8 +61,7 @@
             return
         };
         create(new_name.value);
-        new_name.value =""
-        add_div.style.display="none";
+        location.reload();
     }    
     function create(name){
         fetch(`${website}create?name=${name}`)
