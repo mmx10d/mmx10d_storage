@@ -52,10 +52,32 @@ app.get("/edit",(req,res)=>{
 <head>
     <meta charset="UTF-8">
     <title>Page title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+	body{
+	    background: black;
+	    color: white
+	}
+        #text {
+	    width: 100vw;
+	    height: max-content;
+	}
+	#save_btn {
+	    width: 100%;
+	    background: #922;
+	    color: white;
+	}
+	#refresh_btn {
+	    width: 100%;
+	    background: #292;
+	    color: white;
+	}
+    </style>
 </head>
 <body>
     <textarea id="text">${read}</textarea>
     <button id="save_btn">حفظ</button>
+    <button onclick="location.reload()">الغاء</button>
 <script>
     let text = document.querySelector("#text");
     let save_btn = document.querySelector("#save_btn");

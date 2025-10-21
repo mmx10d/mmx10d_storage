@@ -29,6 +29,9 @@
         #item_div div {
             margin: 3px 0
         }
+        select {
+            padding: 10px;
+        }
     </style>
     <meta charset="UTF-8">
     <title>Page title</title>
@@ -43,7 +46,7 @@
     <div style="display:none" id="add_div">
         <h2>انشاء تخزين</h2>
         <label for="name">الاسم</label>
-        <input autofocus type="text" id="name">
+        <input type="text" id="name">
         <button id="create_btn">تم</button>
     </div>
 </body>
@@ -59,6 +62,7 @@
     add_btn.onclick=()=>{
     if(add_div.style.display=="none"){
         add_div.style.display="";
+        new_name.focus();
     }
     else{
         ads_div.style.display="none";
