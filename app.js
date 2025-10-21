@@ -1,13 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
+const cors = require("cors");
 const app = express();
 app.use(express.json());
-
-const cors = require("cors");
-app.use(cors({
-    origin: "*"
-}));
+app.use(cors({origin: "https://mmx10d-storage.onrender.com"}))
 
 const port = 8893;
 
@@ -162,7 +159,7 @@ app.get("/link",(req,res)=>{
 </html>`);
    }catch{}
 })
-app.get("/save",(req,res)=>{
+app.get("/save", cors(), (req,res)=>{
     let name = req.query.name;
     let data = req.query.data;
     try{
@@ -175,7 +172,7 @@ app.get("/save",(req,res)=>{
 	res.send("تم حفظ البيانات");
     }catch{}
 })
-app.get("/get",(req,res)=>{
+app.get("/get", cors(), (req,res)=>{
     let name = req.query.name;
     try{
 	let read = fs.readFileSync(`data/${name}`, "utf8");
@@ -184,7 +181,7 @@ app.get("/get",(req,res)=>{
 	res.send(read);
     }catch{}
 })
-app.get("/deletesave",(req,res)=>{
+app.get("/deletesave", cors(), (req,res)=>{
     let name = req.query.name;
     let data = req.query.data;
     try{
@@ -199,7 +196,7 @@ app.get("/deletesave",(req,res)=>{
         }
     }catch{}
 })
-app.get("/editsave",(req,res)=>{
+app.get("/editsave", cors(), (req,res)=>{
     let name = req.query.name;
     let new_data = req.query.newdata;
     let old_data = req.query.olddata;
