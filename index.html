@@ -39,7 +39,7 @@
     <div id="item_div">
         <div class="item">لم تتلقى بيانات</div>
     </div>
-    <button id="add_btn" onclick="add_div.style.display=''">انشاء</button>
+    <button id="add_btn">انشاء</button>
     <div style="display:none" id="add_div">
         <h2>انشاء تخزين</h2>
         <label for="name">الاسم</label>
@@ -55,6 +55,15 @@
     const item = document.querySelector(".class");
     const new_name = document.querySelector("#name")
     
+
+    add_btn.onclick=()=>{
+    if(add_div.style.display!=""){
+        add_div.style.display=="";
+    }
+    else{
+        ads_div.style.display=="none";
+    }
+    };
     create_btn.onclick = ()=>{
         if(new_name.value == ""){
             model("ادخل اسم.");
