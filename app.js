@@ -77,7 +77,7 @@ app.get("/edit",(req,res)=>{
 <body>
     <textarea id="text">${read}</textarea>
     <button id="save_btn">حفظ</button>
-    <button onclick="location.reload()">الغاء</button>
+    <button id="refresh_btn"  onclick="location.reload()">الغاء</button>
 <script>
     let text = document.querySelector("#text");
     let save_btn = document.querySelector("#save_btn");
