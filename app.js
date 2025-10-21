@@ -91,6 +91,7 @@ app.get("/link",(req,res)=>{
 	let save_fetch = `fetch(\`${website}save?name=${name}&data=yourdata\`)//send text response`;
 	let get_fetch = `fetch(\`${website}get?name=${name}\`)\n.then(res => res.json())\n.then(res => {\n\t\n})//send object response`;
 	let savedelete_fetch = `fetch(\`${website}deletesave?name=${name}&data=yourdata\`)//didn't send any response`;
+        let saveedit_fetch = `fetch(\`${website}editsave?name=${name}&olddata=yourolddata&newdata=yournewdata\`)//didn't send any response`;
         res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,6 +102,8 @@ app.get("/link",(req,res)=>{
             display:flex;
             flex-direction: column;
             justify-content: center;
+            background: black;
+            color: white;
         }
         #finish {
             background: red;
@@ -119,17 +122,21 @@ app.get("/link",(req,res)=>{
     <code id="save_value">${save_fetch}</code>
     <button id="copy_save_btn">نسخ</button>
     <hr>
+    <code id="get_value">${get_fetch}</code>
+    <button id="copy_get_btn">نسخ</button>
+    <hr>
     <code id="remove_value">${savedelete_fetch}</code>
     <button id="copy_remove_btn">نسخ</button>
     <hr>
-    <code id="get_value">${get_fetch}</code>
-    <button id="copy_get_btn">نسخ</button>
+    <code id="edit_value">${saveedit_fetch}</code>
+    <button id="copy_edit_btn">نسخ</button>
     <hr>
     <button id="finish">انهاء</button>
     
 <script>
     const copy_save_btn = document.querySelector("#copy_save_btn");
     const copy_remove_btn = document.querySelector("#copy_remove_btn");
+    const copy_edit_btn = document.querySelector("#copy_edit_btn")
     const copy_get_btn = document.querySelector("#copy_get_btn");
     copy_save_btn.onclick= ()=>{
         navigator.clipboard.writeText(save_value.innerText);
@@ -141,6 +148,10 @@ app.get("/link",(req,res)=>{
     }
     copy_get_btn.onclick= ()=>{
         navigator.clipboard.writeText(get_value.innerText);
+        alert("تم النسخ");
+    }
+    copy_edit_btn.onclick= ()=>{
+        navigator.clipboard.writeText(edit_value.innerText);
         alert("تم النسخ");
     }
     finish.onclick = ()=>{
@@ -186,6 +197,18 @@ app.get("/deletesave",(req,res)=>{
 	    read = read.slice(1);
 	    fs.writeFileSync(`data/${name}`, read);
         }
+    }catch{}
+})
+app.get("/editsave",(req,res)=>{
+    let name = req.query.name;
+    let new_data = req.query.newdata;
+    let old_data = req.query.olddata;
+    try{
+        let read = fs.readFileSync(`data/${name}`, "utf8");
+        let part1 = read.slice(0,read.indexOf(old_data));
+        let part2 = read.slice(read.indexOf(old_data)+old_data.length);
+        fs.writeFileSync(`data/${name}`, part1+new_data+part2);
+        read = fs.readFileSync(`data/${name}`, "utf8");
     }catch{}
 })
 app.get("/get_files",(req,res)=>{

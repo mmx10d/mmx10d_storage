@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <style>
+        body {
+            background: black;
+            color: white;
+        }
         .item{
             display: flex;
             justify-content: space-around;
+        }
+        #name {
+            width: 100%;
+            height: 100px;
+            font-size: 150%;
+            margin-bottom: 10px
         }
         #create_btn {
             width: 100%;
@@ -13,6 +24,7 @@
             position: fixed:
             bottom: 0;
             margin: 0 auto;
+            width: 100%
         }
         #item_div div {
             margin: 3px 0
@@ -29,15 +41,14 @@
     </div>
     <button id="add_btn" onclick="add_div.style.display=''">انشاء</button>
     <div style="display:none" id="add_div">
+        <h2>انشاء تخزين</h2>
         <label for="name">الاسم</label>
         <input autofocus type="text" id="name">
-        <hr>
-        <p>رسالة</p>
         <button id="create_btn">تم</button>
     </div>
 </body>
 <script>
-    const domains = ["https://mmx10d-storage.onrender.com/",
+    const domains = ["https://mmx10d_storage.onrender.com/",
     "http://localhost:8893/"]
     const website = domains[0];
     
@@ -46,30 +57,30 @@
     
     create_btn.onclick = ()=>{
         if(new_name.value == ""){
-            alert("ادخل اسم.");
+            model("ادخل اسم.");
             return
         };
         create(new_name.value);
+        new_name.value =""
+        add_div.style.display="none";
     }    
     function create(name){
         fetch(`${website}create?name=${name}`)
         .then(res=>{        
         get_items();
-        new_name.value =""
-        add_div.style.display="none";
         })
-        .catch(err=>{alert("خطأ بالاتصال..")})
+        .catch(err=>{model("خطأ بالاتصال..")})
     }
     function del(name){
         fetch(`${website}delete?name=${name}`)
         .then(res=>get_items())
-        .catch(err=>{alert("خطأ بالاتصال..")})
+        .catch(err=>{model("خطأ بالاتصال..")})
     }
     function read(name){
         fetch(`${website}read?name=${name}`)
         .then(res=>res.text())
-        .then(res=>alert(res))
-        .catch(err=>{alert("خطأ بالاتصال..")})
+        .then(res=>model(res))
+        .catch(err=>{model("خطأ بالاتصال..")})
     }
     function link(name){
         fetch(`${website}link?name=${name}`)
@@ -79,18 +90,18 @@
             document.write(res);
             document.close();
         })
-        .catch(err=>{alert("خطأ بالاتصال..")})
+        .catch(err=>{model("خطأ بالاتصال..")})
     }
     function edit(name){
         fetch(`${website}edit?name=${name}`)
         .then(res => res.text())
         .then(res => {
-        if(res.includes(`id="text"><`)){alert("لايمكن تعديل ملف فارغ");return}     
+        if(res.includes(`id="text"><`)){model("لايمكن تعديل ملف فارغ");return}     
             document.open();
             document.write(res)
             document.close();
         })
-        .catch(err=>{alert("خطأ بالاتصال..")})
+        .catch(err=>{model("خطأ بالاتصال..")})
     }
     function add_item(name){
         item_div.innerHTML += 
@@ -132,7 +143,7 @@
                         }
                         break;
                     default:
-                    alert("لم تختر عملية")
+                    model("لم تختر عملية")
                 }
                 item_select.value = "none"
             }
@@ -153,6 +164,48 @@
             }}
         })
         .catch(err=>item_div.innerHTML="خطا بتلقي البيانات"+err)
+    }
+    function model(message, title="اشعار"){
+        document.body.innerHTML += `
+            <div id="xx1_model_cover"></div>
+            <div id="xx1_model">
+                <h2>${title}</h2>
+                <p>${message}</p>
+                <button>حسنا</button>
+            </div>
+        `;
+        let xx1_model_cover = document.querySelector("#xx1_model_cover")
+        let xx1_model = document.querySelector("#xx1_model");
+        let xx1_model_title = xx1_model.querySelector("h2");
+        let xx1_model_message = xx1_model.querySelector("p");
+        let xx1_model_ok = xx1_model.querySelector("button");
+        
+        xx1_model_cover.style.cssText = `
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.4);
+        position:absolute;
+        left:0;
+        top:0
+        `;
+        xx1_model.style.cssText = `
+        width: 95vw;
+        height: max-content;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        translate: -50% -50%;
+        border-radius: 15px;
+        background: black;
+        color: white;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        `;
+        xx1_model_ok.onclick =()=>{
+            xx1_model.remove();
+            xx1_model_cover.remove();
+        }
     }
     get_items();
 </script>
