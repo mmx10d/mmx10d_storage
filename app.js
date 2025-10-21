@@ -21,11 +21,12 @@ app.get("/create",(req,res)=>{
 	name+=".txt";
     }
     if(fs.existsSync(`data/${name}`)){
-	res.send("<h1>الملف موجود مسبقا.. قم بتغيير الاسم</h1><script>setTimout(()=>location.path='',3000)</script>");
+	res.send("الملف موجود مسبقا.. قم بتغيير الاسم");
 	return
     }
     try{
 	fs.writeFileSync(`data/${name}`, "");
+        res.send("تم انشاء الملف");
    }catch{}
 })
 app.get("/delete",(req,res)=>{

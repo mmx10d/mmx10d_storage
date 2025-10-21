@@ -61,12 +61,13 @@
             return
         };
         create(new_name.value);
-        location.reload();
     }    
     function create(name){
         fetch(`${website}create?name=${name}`)
         .then(res=>{        
         get_items();
+        add_div.style.display= "none";
+        name.value ="";
         })
         .catch(err=>{model("خطأ بالاتصال..")})
     }
