@@ -64,10 +64,15 @@
     }    
     function create(name){
         fetch(`${website}create?name=${name}`)
-        .then(res=>{        
+        .then(res=>res.text())
+        .then(res=>{
         get_items();
+        new_name.value = "";
         add_div.style.display= "none";
-        name.value ="";
+        if(res.length>14)
+        {
+	    model(res);
+        }
         })
         .catch(err=>{model("خطأ بالاتصال..")})
     }
