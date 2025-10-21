@@ -159,7 +159,6 @@
                     default:
                     model("لم تختر عملية")
                 }
-                item_select.value = "none"
             }
         }
     }
@@ -217,8 +216,7 @@
         flex-direction: column;
         `;
         xx1_model_ok.onclick =()=>{
-            xx1_model.remove();
-            xx1_model_cover.remove();
+            location.reload();
         }
     }
     get_items();
