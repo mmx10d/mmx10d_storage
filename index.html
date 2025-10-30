@@ -129,7 +129,6 @@
         get_items();
         new_name.value = "";
         add_div.style.display = "none";
-        model(res);
       })
       .catch(err => { model("خطأ بالاتصال..") })
   }
@@ -140,7 +139,6 @@
         get_folders();
         new_name.value = "";
         add_div.style.display = "none";
-        model(res);
       })
       .catch(err => { model("خطأ بالاتصال..") })
   }
