@@ -4,50 +4,74 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 app.use(express.json());
-app.use(cors({origin: ["https://mmx10d-storage.onrender.com","https://mmx10d-storage.onrender.com/"]}));
+app.use(cors({ origin: ["https://mmx10d-storage.onrender.com", "https://mmx10d-storage.onrender.com/"] }));
 
 const port = 8893;
 
-const domains = ["https://mmx10d-storage.onrender.com/","http://localhost:8893/"]
+const domains = ["https://mmx10d-storage.onrender.com/", "http://localhost:8893/"]
 const website = domains[0];
 
-app.get("/",(req,res)=>{
-    res.sendFile(path.join(__dirname,"index.html"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 })
 
-app.get("/create",(req,res)=>{
-    let name = req.query.name;
-    if(name.slice(-4)!==".txt"){
-	name+=".txt";
-    }
-    if(fs.existsSync(`data/${name}`)){
-	res.send("الملف موجود مسبقا.. قم بتغيير الاسم");
-	return
-    }
-    try{
-	fs.writeFileSync(`data/${name}`, "");
-        res.send("تم انشاء الملف");
-   }catch{}
+app.get("/create", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  if (name.slice(-4) !== ".txt") {
+    name += ".txt";
+  }
+  if (fs.existsSync(`data/${folder}/${name}`)) {
+    res.send("الملف موجود مسبقا.. قم بتغيير الاسم");
+    return
+  }
+  try {
+    fs.writeFileSync(`data/${folder}/${name}`, "");
+    res.send("تم انشاء الملف");
+  } catch { }
 })
-app.get("/delete",(req,res)=>{
-    let name = req.query.name;
-    try{
-	fs.unlinkSync(`data/${name}`);
-	res.send("<h1>تم حذف الملف</h1><script>setTimout(()=>location.path='',3000)</script>");
-   }catch{}
+
+app.get("/createFolder", (req, res) => {
+  let name = req.query.name;
+  if (fs.existsSync(`data/${name}`)) {
+    res.send("المجلد موجود مسبقا.. قم بتغيير الاسم");
+    return
+  }
+  try {
+    fs.mkdirSync(`data/${name}`);
+    res.send("تم انشاء المجلد");
+  } catch { }
 })
-app.get("/read",(req,res)=>{
-    let name = req.query.name;
-    try{
-	let read = fs.readFileSync(`data/${name}`, "utf8") || "لايوجد بيانات داخل الملف";
-	res.send(read);
-    }catch{}
+
+app.get("/deleteFolder", (req, res) => {
+  let name = req.query.name;
+  try {
+    fs.rmdirSync(`data/${name}`, {recursive: true,force: true});
+  } catch { }
 })
-app.get("/edit",(req,res)=>{
-    let name = req.query.name;
-    try{
-        let read = fs.readFileSync(`data/${name}`, "utf8");
-	res.send(`<!DOCTYPE html>
+
+app.get("/delete", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  try {
+    fs.unlinkSync(`data/${folder}/${name}`);
+    res.send("<h1>تم حذف الملف</h1><script>setTimout(()=>location.path='',3000)</script>");
+  } catch { }
+})
+app.get("/read", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`, "utf8") || "لايوجد بيانات داخل الملف";
+    res.send(read);
+  } catch { }
+})
+app.get("/edit", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+    res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +106,7 @@ app.get("/edit",(req,res)=>{
     let text = document.querySelector("#text");
     let save_btn = document.querySelector("#save_btn");
     save_btn.onclick= ()=>{
-        fetch("${website}"+"editfile?name="+"${name}"+"&data="+text.value)
+        fetch("${website}"+"editfile?folder=${folder}&name="+"${name}"+"&data="+text.value)
         .then(_=>{
             alert("تم التعديل");
             location.reload()
@@ -95,24 +119,26 @@ app.get("/edit",(req,res)=>{
 </script>
 </body>
 </html>`);
-    }catch{}
+  } catch { }
 });
-app.get("/editfile",(req,res)=>{
-    let name = req.query.name;
-    let data = req.query.data;
-    try{
-        fs.writeFileSync(`data/${name}`,data);
-        res.send("تم تعديل البيانات");
-    }catch{}
+app.get("/editfile", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  let data = req.query.data;
+  try {
+    fs.writeFileSync(`data/${folder}/${name}`, data);
+    res.send("تم تعديل البيانات");
+  } catch { }
 })
-app.get("/link",(req,res)=>{
-    let name = req.query.name;
-    try{
-	let save_fetch = `fetch(\`${website}save?name=${name}&data=yourdata\`)//send text response`;
-	let get_fetch = `fetch(\`${website}get?name=${name}\`)\n.then(res => res.json())\n.then(res => {\n\t\n})//send object response`;
-	let savedelete_fetch = `fetch(\`${website}deletesave?name=${name}&data=yourdata\`)//didn't send any response`;
-        let saveedit_fetch = `fetch(\`${website}editsave?name=${name}&olddata=yourolddata&newdata=yournewdata\`)//didn't send any response`;
-        res.send(`<!DOCTYPE html>
+app.get("/link", (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  try {
+    let save_fetch = `fetch(\`${website}<span style="color: black">save</span>?folder=${folder}&name=${name}&data=yourdata\`)//send text response`;
+    let get_fetch = `fetch(\`${website}<span style="color: black">get</span>?folder=${folder}&name=${name}\`)\n.then(res => res.json())\n.then(res => {\n\t\n})//send object response`;
+    let savedelete_fetch = `fetch(\`${website}<span style="color: black">deletesave</span>?folder=${folder}&name=${name}&data=yourdata\`)//didn't send any response`;
+    let saveedit_fetch = `fetch(\`${website}<span style="color: black">editsave</span>?folder=${folder}&name=${name}&olddata=yourolddata&newdata=yournewdata\`)//didn't send any response`;
+    res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -180,64 +206,74 @@ app.get("/link",(req,res)=>{
 </script>
 </body>
 </html>`);
-   }catch{}
+  } catch { }
 })
-app.get("/save", cors(), (req,res)=>{
-    let name = req.query.name;
-    let data = req.query.data;
-    try{
-	let read = fs.readFileSync(`data/${name}`)
-	if(read.includes(data)){
-    	    res.send("البيانات موجودة مسبقا");
-	    return
-        }
-        fs.appendFileSync(`data/${name}`, data + ",");
-	res.send("تم حفظ البيانات");
-    }catch{}
+app.get("/save", cors(), (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  let data = req.query.data;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`);
+    if (read.includes(data)) {
+      res.send("البيانات موجودة مسبقا");
+      return
+    }
+    fs.appendFileSync(`data/${folder}/${name}`, data + ",");
+    res.send("تم حفظ البيانات");
+  } catch { }
 })
-app.get("/get", cors(), (req,res)=>{
-    let name = req.query.name;
-    try{
-	let read = fs.readFileSync(`data/${name}`, "utf8");
-	read = read.split(",");
-	read.pop();
-	res.send(read);
-    }catch{}
+app.get("/get", cors(), (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+    read = read.split(",");
+    read.pop();
+    res.send(read);
+  } catch { }
 })
-app.get("/deletesave", cors(), (req,res)=>{
-    let name = req.query.name;
-    let data = req.query.data;
-    try{
-	let read = fs.readFileSync(`data/${name}`, "utf8");
-	let part1 = read.slice(0,read.indexOf(data));
-        let part2 = read.slice(read.indexOf(data)+data.length);
-	fs.writeFileSync(`data/${name}`, part1+part2);
-	read = fs.readFileSync(`data/${name}`, "utf8");
-	if(read[0]==","){
-	    read = read.slice(1);
-	    fs.writeFileSync(`data/${name}`, read);
-        }
-    }catch{}
+app.get("/deletesave", cors(), (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  let data = req.query.data;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+    let part1 = read.slice(0, read.indexOf(data));
+    let part2 = read.slice(read.indexOf(data) + data.length);
+    fs.writeFileSync(`data/${folder}/${name}`, part1 + part2);
+    read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+    if (read[0] == ",") {
+      read = read.slice(1);
+      fs.writeFileSync(`data/${folder}/${name}`, read);
+    }
+  } catch { }
 })
-app.get("/editsave", cors(), (req,res)=>{
-    let name = req.query.name;
-    let new_data = req.query.newdata;
-    let old_data = req.query.olddata;
-    try{
-        let read = fs.readFileSync(`data/${name}`, "utf8");
-        let part1 = read.slice(0,read.indexOf(old_data));
-        let part2 = read.slice(read.indexOf(old_data)+old_data.length);
-        fs.writeFileSync(`data/${name}`, part1+new_data+part2);
-        read = fs.readFileSync(`data/${name}`, "utf8");
-    }catch{}
+app.get("/editsave", cors(), (req, res) => {
+  let folder = req.query.folder;
+  let name = req.query.name;
+  let new_data = req.query.newdata;
+  let old_data = req.query.olddata;
+  try {
+    let read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+    let part1 = read.slice(0, read.indexOf(old_data));
+    let part2 = read.slice(read.indexOf(old_data) + old_data.length);
+    fs.writeFileSync(`data/${folder}/${name}`, part1 + new_data + part2);
+    read = fs.readFileSync(`data/${folder}/${name}`, "utf8");
+  } catch { }
 })
-app.get("/get_files",(req,res)=>{
-    try{
-	let files = fs.readdirSync("data");
-	res.send(files);
-    }catch{}
+app.get("/get_files", (req, res) => {
+  let folder_name = req.query.folder
+  try {
+    let files = fs.readdirSync(`data/${folder_name}`);
+    res.send(files);
+  } catch { }
 })
-app.listen(port,()=>
-{
-    console.log(`app run on ${port}`);
+app.get("/get_folders", (req, res) => {
+  try {
+    let folders = fs.readdirSync('data');
+    res.send(folders)
+  } catch { }
+})
+app.listen(port, () => {
+  console.log(`app run on ${port}`);
 })

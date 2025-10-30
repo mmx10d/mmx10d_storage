@@ -1,129 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <style>
-        body {
-            background: black;
-            color: white;
-        }
-        .item{
-            display: flex;
-            justify-content: space-around;
-        }
-        #name {
-            width: 100%;
-            height: 100px;
-            font-size: 150%;
-            margin-bottom: 10px
-        }
-        #create_btn {
-            width: 100%;
-        }
-        #add_btn {
-            position: fixed;
-            bottom: 0;
-            margin: 0 auto;
-            width: 100%
-        }
-        #item_div div {
-            margin: 3px 0
-        }
-        select {
-            padding: 10px;
-        }
-    </style>
-    <meta charset="UTF-8">
-    <title>Page title</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <style>
+    * {
+      font-size: 1.3rem;
+    }
+
+    body {
+      background: black;
+      color: white;
+      text-align: center;
+    }
+
+    .folder {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border: 1px solid white;
+      height: 2rem;
+    }
+
+    .folder:hover {
+      background: rgb(196, 196, 196);
+      color: black;
+      cursor: pointer;
+    }
+
+    #name {
+      width: 100%;
+      height: 100px;
+      font-size: 150%;
+      margin-bottom: 10px
+    }
+
+    #create_btn {
+      width: 100%;
+    }
+
+    #add_btn {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2rem;
+      cursor: pointer;
+    }
+
+    #item_div div {
+      margin: 3px 0
+    }
+
+    #add_div {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      translate: -50%;
+      z-index: 2;
+    }
+
+    #add_cover {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      background: rgba(0, 0, 0);
+      display: none;
+    }
+
+    select {
+      padding: 10px;
+    }
+  </style>
+  <meta charset="UTF-8">
+  <title>Page title</title>
 </head>
+
 <body>
-    <h1>ادارة التخزين</h1>
-    <hr>
-    <div id="item_div">
-        <div class="item">لم تتلقى بيانات</div>
-    </div>
-    <button id="add_btn">انشاء</button>
-    <div style="display:none" id="add_div">
-        <h2>انشاء تخزين</h2>
-        <label for="name">الاسم</label>
-        <input type="text" id="name">
-        <button id="create_btn">تم</button>
-    </div>
+  <h1 onclick="sessionStorage.removeItem('folder_name');location.reload()">ادارة التخزين</h1>
+  <hr>
+  <div id="item_div">
+    <div class="item">لم تتلقى بيانات</div>
+  </div>
+  <button id="add_btn">انشاء</button>
+  <div style="display:none" id="add_div">
+    <h2>انشاء تخزين</h2>
+    <label for="name">الاسم</label>
+    <input type="text" id="name">
+    <button id="create_btn">تم</button>
+  </div>
+  <div id="add_cover" onclick="add_div.style.display ='none';this.style.display='none'"></div>
 </body>
 <script>
-    const domains = ["https://mmx10d-storage.onrender.com/",
+  const domains = ["https://mmx10d-storage.onrender.com/",
     "http://localhost:8893/"]
-    const website = domains[0];
-    
-    const item = document.querySelector(".class");
-    const new_name = document.querySelector("#name")
-    
+  const website = domains[0];
 
-    add_btn.onclick=()=>{
-    if(add_div.style.display=="none"){
-        add_div.style.display="";
-        new_name.focus();
-    }
-    else{
-        add_div.style.display="none";
-    }
+  const new_name = document.querySelector("#name");
+  let folder_name = sessionStorage.getItem('folder_name') || false;
+
+  let endtouch;
+  
+
+  add_btn.onclick = () => {
+    add_div.style.display = "";
+    add_cover.style.display = "block";
+    new_name.focus();
+  };
+  create_btn.onclick = () => {
+    if (new_name.value == "") {
+      model("ادخل اسم.");
+      return
     };
-    create_btn.onclick = ()=>{
-        if(new_name.value == ""){
-            model("ادخل اسم.");
-            return
-        };
-        create(new_name.value);
-    }    
-    function create(name){
-        fetch(`${website}create?name=${name}`)
-        .then(res=>res.text())
-        .then(res=>{
+    if (folder_name != false) {
+      create(new_name.value);
+    }
+    else {
+      createFolder(new_name.value);
+    }
+  }
+  function create(name) {
+    fetch(`${website}create?folder=${folder_name}&name=${name}`)
+      .then(res => res.text())
+      .then(res => {
         get_items();
         new_name.value = "";
-        add_div.style.display= "none";
-        if(res.length>14)
-        {
-	    model(res);
-        }
-        })
-        .catch(err=>{model("خطأ بالاتصال..")})
-    }
-    function del(name){
-        fetch(`${website}delete?name=${name}`)
-        .then(res=>get_items())
-        .catch(err=>{model("خطأ بالاتصال..")})
-    }
-    function read(name){
-        fetch(`${website}read?name=${name}`)
-        .then(res=>res.text())
-        .then(res=>model(res))
-        .catch(err=>{model("خطأ بالاتصال..")})
-    }
-    function link(name){
-        fetch(`${website}link?name=${name}`)
-        .then(res => res.text())
-        .then(res => {
-            document.open();
-            document.write(res);
-            document.close();
-        })
-        .catch(err=>{model("خطأ بالاتصال..")})
-    }
-    function edit(name){
-        fetch(`${website}edit?name=${name}`)
-        .then(res => res.text())
-        .then(res => {
-        if(res.includes(`id="text"><`)){model("لايمكن تعديل ملف فارغ");return}     
-            document.open();
-            document.write(res)
-            document.close();
-        })
-        .catch(err=>{model("خطأ بالاتصال..")})
-    }
-    function add_item(name){
-        item_div.innerHTML += 
-        `
+        add_div.style.display = "none";
+        model(res);
+      })
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function createFolder(name) {
+    fetch(`${website}createFolder?name=${name}`)
+      .then(res => res.text())
+      .then(res => {
+        get_folders();
+        new_name.value = "";
+        add_div.style.display = "none";
+        model(res);
+      })
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function del(name) {
+    fetch(`${website}delete?folder=${folder_name}&name=${name}`)
+      .then(res => get_items())
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function read(name) {
+    fetch(`${website}read?folder=${folder_name}&name=${name}`)
+      .then(res => res.text())
+      .then(res => model(res))
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function link(name) {
+    fetch(`${website}link?folder=${folder_name}&name=${name}`)
+      .then(res => res.text())
+      .then(res => {
+        document.open();
+        document.write(res);
+        document.close();
+      })
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function edit(name) {
+    fetch(`${website}edit?folder=${folder_name}&name=${name}`)
+      .then(res => res.text())
+      .then(res => {
+        document.open();
+        document.write(res)
+        document.close();
+      })
+      .catch(err => { model("خطأ بالاتصال..") })
+  }
+  function add_folder(name) {
+    item_div.innerHTML +=
+      `
+        <div class="folder">📁 ${name}</div>
+      `;
+    folders_update();
+  }
+  function add_item(name) {
+    item_div.innerHTML +=
+      `
             <div class="item">
                 <span>${name}</span>
                 <select>
@@ -135,55 +196,132 @@
                 </select>
             </div>
         `;
-        items_update();
-    }
-    function items_update(){
-        const items = document.querySelectorAll(".item")
-        for(let i = 0 ; i < items.length ; i++){
-            const item = items[i];
-            const item_select = item.querySelector("select");
-            const file_name = item.querySelector("span")
-            item_select.onchange=()=>{
-                switch(item_select.value){
-                    case 'link':
-                        link(file_name.innerText);
-                        break;
-                    case 'read':
-                        read(file_name.innerText);
-                        break;
-                    case 'edit':
-                        edit(file_name.innerText);
-                        break;
-                    case 'del':
-                        let ask = confirm(`هل تاكد حذف ${file_name.innerText} ؟`)
-                        if(ask){
-                            del(file_name.innerText);
-                        }
-                        break;
-                    default:
-                    model("لم تختر عملية")
-                }
+    items_update();
+  }
+  function folders_update() {
+    const folders = document.querySelectorAll('.folder');
+    for (let i = 0; i < folders.length; i++) {
+      const folder = folders[i];
+      folder.addEventListener('click', () => {
+        item_div.innerHTML = 'جاري التحميل...';
+        folder_name = folder.innerText.slice(3);
+        sessionStorage.setItem('folder_name', folder_name)
+        fetch(`${website}get_files?folder=${folder_name}`)
+          .then(res => res.json())
+          .then(res => {
+            if (res.length < 1) {
+              item_div.innerHTML = 'المجلد فارغ';
             }
+            else {
+              item_div.innerHTML = '';
+              for (let g = 0; g < res.length; g++) {
+                add_item(res[g]);
+              };
+            }
+          })
+          .catch(err => {
+            item_div.innerHTML = 'لايمكن التحميل حاول مجددا...'
+          })
+      })
+      folder.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        let ask = prompt(`لحذف المجلد اكتب "${folder.innerText.slice(3)}"`);
+        if (ask === folder.innerText.slice(3)) {
+          fetch(`${website}deleteFolder?name=${folder.innerText.slice(3)}`)
+          location.reload();
         }
+        else{
+          location.reload();
+        }
+      });
+       folder.addEventListener('touchstart', () => {
+        endtouch = setTimeout(()=>{
+           let ask = prompt(`لحذف المجلد اكتب "${folder.innerText.slice(3)}"`);
+           if (ask === folder.innerText.slice(3)) {
+             fetch(`${website}deleteFolder?name=${folder.innerText.slice(3)}`)
+             location.reload();
+           }
+           else{
+            location.reload();
+           }
+        },500)
+      });
+      folder.addEventListener('touchend', () => {
+        clearTimeout(endtouch)
+      });
     }
-    function get_items(){
-        fetch(`${website}get_files`)
-        .then(res => res.json())        
-        .then(res=>{
-        item_div.innerHTML="";
-            if(res.length < 1){
-                item_div.innerHTML="لا يوجد عناصر"
+  }
+  function items_update() {
+    const items = document.querySelectorAll(".item");
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      const item_select = item.querySelector("select");
+      const file_name = item.querySelector("span")
+      item_select.onchange = () => {
+        switch (item_select.value) {
+          case 'link':
+            link(file_name.innerText);
+            break;
+          case 'read':
+            read(file_name.innerText);
+            break;
+          case 'edit':
+            edit(file_name.innerText);
+            break;
+          case 'del':
+            let ask = confirm(`هل تاكد حذف ${file_name.innerText} ؟`)
+            if (ask) {
+              del(file_name.innerText);
+              location.reload();
             }
-            else{
-            for(let i = 0; i<res.length;i++){
-                file = res[i];
-                add_item(file);
-            }}
-        })
-        .catch(err=>item_div.innerHTML="خطا بتلقي البيانات"+err)
+            else {
+              location.reload();
+            }
+            break;
+          default:
+            model("لم تختر عملية")
+        }
+      }
     }
-    function model(message, title="اشعار"){
-        document.body.innerHTML += `
+  }
+  function get_folders() {
+    fetch(`${website}get_folders`)
+      .then(res => res.json())
+      .then(res => {
+        item_div.innerHTML = "";
+        if (res.length < 1) {
+          item_div.innerHTML = "لا يوجد عناصر"
+        }
+        else {
+          for (let i = 0; i < res.length; i++) {
+            file = res[i];
+            add_folder(file);
+          }
+        }
+      })
+      .catch(err => item_div.innerHTML = "خطا بتلقي البيانات" + err)
+  }
+  function get_items() {
+    fetch(`${website}get_files`)
+      .then(res => res.json())
+      .then(res => {
+        item_div.innerHTML = "";
+        if (res.length < 1) {
+          item_div.innerHTML = "لا يوجد عناصر"
+        }
+        else {
+          for (let i = 0; i < res.length; i++) {
+            file = res[i];
+            add_item(file);
+          }
+        }
+      })
+      .catch(err => item_div.innerHTML = "خطا بتلقي البيانات" + err)
+  }
+  function model(message, title = "اشعار") {
+    add_cover.style.display = "";
+    add_div.style.display = "none"
+    document.body.innerHTML += `
             <div id="xx1_model_cover"></div>
             <div id="xx1_model">
                 <h2>${title}</h2>
@@ -191,13 +329,13 @@
                 <button>حسنا</button>
             </div>
         `;
-        let xx1_model_cover = document.querySelector("#xx1_model_cover")
-        let xx1_model = document.querySelector("#xx1_model");
-        let xx1_model_title = xx1_model.querySelector("h2");
-        let xx1_model_message = xx1_model.querySelector("p");
-        let xx1_model_ok = xx1_model.querySelector("button");
-        
-        xx1_model_cover.style.cssText = `
+    let xx1_model_cover = document.querySelector("#xx1_model_cover")
+    let xx1_model = document.querySelector("#xx1_model");
+    let xx1_model_title = xx1_model.querySelector("h2");
+    let xx1_model_message = xx1_model.querySelector("p");
+    let xx1_model_ok = xx1_model.querySelector("button");
+
+    xx1_model_cover.style.cssText = `
         width: 100vw;
         height: 100vh;
         background: rgba(0,0,0,0.4);
@@ -205,7 +343,7 @@
         left:0;
         top:0
         `;
-        xx1_model.style.cssText = `
+    xx1_model.style.cssText = `
         width: 95vw;
         height: max-content;
         position: absolute;
@@ -219,10 +357,26 @@
         display: flex;
         flex-direction: column;
         `;
-        xx1_model_ok.onclick =()=>{
-            location.reload();
-        }
+    xx1_model_ok.onclick = () => {
+      location.reload();
     }
-    get_items();
+  }
+  get_folders();
+  if (folder_name != false) {
+      fetch(`${website}get_files?folder=${folder_name}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.length < 1) {
+            item_div.innerHTML = 'المجلد فارغ';
+          }
+          else {
+            item_div.innerHTML = '';
+            for (let g = 0; g < res.length; g++) {
+              add_item(res[g]);
+            };
+          }
+        })
+    }
 </script>
+
 </html>
