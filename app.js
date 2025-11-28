@@ -4,11 +4,11 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: ["https://mmx10d-storage.onrender.com", "https://mmx10d-storage.onrender.com/"] }));
+app.use(cors({ origin: ["https://mmx10d-storage-vbvt.onrender.com", "https://mmx10d-storage.onrender.com/"] }));
 
 const port = 8893;
 
-const domains = ["https://mmx10d-storage.onrender.com/", "http://localhost:8893/"]
+const domains = ["https://mmx10d-storage-vbvt.onrender.com/", "http://localhost:8893/"]
 const website = domains[0];
 
 app.get("/", (req, res) => {
